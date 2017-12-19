@@ -1,107 +1,76 @@
 import random as r
 import string
+import datetime
 
-file_names = open("n1.txt", "r")
-file_surnames = open('names.txt', 'r')
+names_file = "names_teste1.txt"
+surnames_file = "surnames_teste1.txt"
 
-#Nested list
-#Each list inside these lists has a letter just for identification purposes
-#After the names are inserted in the list, these letters are removed
+def list_from_file(filename, listname):
+	for line in filename:
+		if line.strip() != '':
+			listname.append(line.strip().lower().capitalize())
+	return listname
 
-list_names = [
-	['a'], 
-	['b'], 
-	['c'], 
-	['d'], 
-	['e'], 
-	['f'],
-	['g'],
-	['h'],
-	['i'],
-	['j'], 
-	['k'],
-	['l'],
-	['m'],
-	['n'],
-	['o'],
-	['p'],
-	['q'],
-	['r'],
-	['s'],
-	['t'],
-	['u'],
-	['v'],
-	['w'],
-	['x'],
-	['y'],
-	['z']
-]
+def listofnames(listnames, listsurnames):
+	return sorted([listnames[x]+' '+listsurnames[y] for x in range(0, len(listnames)) for y in range(0, len(listsurnames)) if listnames[x] != listsurnames[y]])
 
-list_surnames = [ 
-	['a'], 
-	['b'], 
-	['c'], 
-	['d'], 
-	['e'], 
-	['f'],
-	['g'],
-	['h'],
-	['i'],
-	['j'], 
-	['k'],
-	['l'],
-	['m'],
-	['n'],
-	['o'],
-	['p'],
-	['q'],
-	['r'],
-	['s'],
-	['t'],
-	['u'],
-	['v'],
-	['w'],
-	['x'],
-	['y'],
-	['z']
-]
+def random_names(listname, max_names, listresult):
+	rand = r.sample(range(0, len(listname)), max_names)
+	for n in range(0, max_names):
+		listresult.append(listname[rand[n]])
+	return listresult
 
-for line in file_names:
-	for i in string.ascii_uppercase:
-		if(line.strip().startswith(i)):
-			i = i.lower()
-			#list_names[i].append(line.strip().lower().capitalize())
-			list_names[[n for n in range(0, len(list_names)) if list_names[n][0] == i][0]].append(line.strip().lower().capitalize())
+def gen_dateofbirth():
+	dstart = datetime.date(1940, 1, 1)
+	ddif = (datetime.date(2000, 1,1 )-dstart).days
+	drand = r.randint(0, ddif)
+	return dstart+datetime.timedelta(days=drand)
 
-#Close the file_names
-file_names.close()
+def gen_email(name):
+	providers = ['@gmail.com', '@hotmail.com', '@outlook.com', '@yahoo.com', '@bol.com']
+	namesplit = name.lower().split()
+	decider = r.randint(0, 10)	
+	randprov = providers[r.randint(0, len(providers)-1)]
+	if decider > 8:
+		return namesplit[0]+"_"+namesplit[1]+randprov
+	elif 5 <= decider <= 8:
+		return namesplit[1]+"_"+namesplit[0]+randprov
+	elif 3 <= decider <= 5:
+		return name.replace(" ", "").lower()+str(r.randint(100, 999))+randprov
+	else:
+		return name.replace(" ", "").lower()+randprov
 
-for line in file_surnames:
-	for i in string.ascii_lowercase:
-		if(line.strip().startswith(i.upper())):
-			list_surnames[[n for n in range(0, len(list_surnames)) if list_surnames[n][0] == i][0]].append(line.strip().lower().capitalize())
+def makeDict(listnames):
+	dic = {}
+	for name in listnames:
+		email = gen_email(name)
+		birth = gen_dateofbirth()
+		dic[name] = [email, birth]
+	return dic
 
-#Close the file_surnames
-file_surnames.close()
+def dictToCSV(dic, filename):
+	strcsv = ''
+	templist = []
+	for key, val in dic.items():
+		strcsv += key+','+val[0]+','+str(val[1])+"\n"
+	strcsv = strcsv[:-1]
+	if filename:
+		fileio = open(filename, "w")
+		for line in strcsv:
+			fileio.write(line)
+		fileio.close()
+	return strcsv
 
-for i in list_names:
-    i.pop(0)
-for i in list_surnames:
-    i.pop(0)
+if __name__ == '__main__':
+	file_names = open(names_file, "r")
+	file_surnames = open(surnames_file, "r")
 
-nomes = [list_names[x][y]+' '+list_surnames[j][k] 
-		for x in range(0, len(list_names)) 
-		for y in range(0, len(list_names[x])) 
-		for j in range(0, len(list_surnames)) 
-		for k in range(0, len(list_surnames[j])) 
-		if list_names[x][y] != list_surnames[j][k]]
+	list_names = list_from_file(file_names, [])
+	list_surnames = list_from_file(file_surnames, [])
 
-#Now we store the names in a txt file
-arq = open("nomes_result.txt", "w")
-
-for n in nomes:
-    arq.write(n + "\n")
-
-arq.close()
-
-print(len(nomes))
+	file_names.close()
+	file_surnames.close()
+	
+	names = listofnames(list_names, list_surnames)
+	dicnames = makeDict(names)
+	csv = dictToCSV(dicnames, 'csv.txt')
