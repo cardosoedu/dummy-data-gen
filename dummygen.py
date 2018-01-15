@@ -1,6 +1,7 @@
 import random as r
 import string
 import datetime
+import os
 
 names_file = "names_teste1.txt"
 surnames_file = "surnames_teste1.txt"
@@ -62,15 +63,46 @@ def dictToCSV(dic, filename):
 	return strcsv
 
 if __name__ == '__main__':
-	file_names = open(names_file, "r")
-	file_surnames = open(surnames_file, "r")
+    print("Dummy Data Generator")
+    print("Please, input below the required file names.")
+    
+    for i in range(3):
+        try:
+            names_file = input("List of names (names separeted by new lines):\n")
+            file_names = open(names_file, "r")
+        except FileNotFoundError:
+            print("Couldn't find the file...")
+        else:
+            break
+    else:
+        exit("Maximum tries exceeded. Quitting...")
+    for i in range(3):
+        try:
+            surnames_file = input("List of surnames (names separated by new lines):\n")
+            file_surnames = open(surnames_file, "r")
+        except FileNotFoundError:
+            print("Couldn't find the file...")
+        else:
+            break
+    else:
+        exit("Maximum tries exceeded. Quitting...")
+    
+    nameoffile = input("What should be the name of the resulting file?\n")
 
-	list_names = list_from_file(file_names, [])
-	list_surnames = list_from_file(file_surnames, [])
+    #file_names = open(names_file, "r")
+    #file_surnames = open(surnames_file, "r")
 
-	file_names.close()
-	file_surnames.close()
+    list_names = list_from_file(file_names, [])
+    list_surnames = list_from_file(file_surnames, [])
+
+    file_names.close()
+    file_surnames.close()
 	
-	names = listofnames(list_names, list_surnames)
-	dicnames = makeDict(names)
-	csv = dictToCSV(dicnames, 'csv.txt')
+    names = listofnames(list_names, list_surnames)
+    dicnames = makeDict(names)
+    csv = dictToCSV(dicnames, '{}.txt'.format(nameoffile))
+    
+    if(csv):
+        print('You can find the CSV in %s.txt' % nameoffile)
+    else:
+        print('Sorry, something went wrong...')
